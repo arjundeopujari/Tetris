@@ -1,6 +1,7 @@
 #include "msp.h"
 #include "init.h"
 #include "timer.h"
+#include "test.h"
 
 
 /**
@@ -20,6 +21,10 @@ void main(void)
 	/* Enable global interrupts */
 	__enable_irq();
 	StartTimer();
+
+	while (1) {
+	    TestLEDMatrix();
+	}
 }
 
 /*Timer A0 ISR*/
