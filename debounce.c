@@ -9,40 +9,36 @@
 #include "msp.h"
 #include "types.h"
 
-static DebounceFSM fsm = {LOW, 0x00, 0x00};
+void debounce_tick() {
+    // Only "tick" if the FSM is awaiting the input to settle.
+    if (fsm.state == TRANSITION) {
+        fsm.current_cycles++;
+        if (fsm.current_cycles >= DEBOUNCE_CYCLES) {
+            next_state(P6OUT, true);
+        }
+    }
+}
 
 void next_state(unsigned char buttons, bool source_is_timer)
 {
     switch (fsm.state)
     {
-    case LOW:
-        fsm.state = LOW_HIGH_TRANSITION;
+    case STABLE:
+        // Any input will cause the FSM to try to transition.
+        fsm.state = TRANSITION;
         break;
-    case LOW_HIGH_TRANSITION:
+    case TRANSITION:
         if (source_is_timer)
         {
-            fsm.state = HIGH;
+            fsm.state = STABLE;
             fsm.prev = fsm.current;
-            fsm.current = buttons;
+            fsm.current = ~buttons; // Negate since buttons are active low.
+            fsm.is_handled = false;
         }
-        break;
-    case HIGH:
-        fsm.state = HIGH_LOW_TRANSITION;
-        break;
-    case HIGH_LOW_TRANSITION:
-        if (source_is_timer)
-        {
-            fsm.state = LOW;
-            fsm.prev = fsm.current;
-            fsm.current = buttons;
-        }
+        // Reset the debounce clock if either the clock times out or if the switch bounces here.
+        fsm.current_cycles = 0;
         break;
     default:
         break;
     }
-}
-
-unsigned char get_debounced_buttons()
-{
-    return fsm.current;
 }

@@ -51,6 +51,21 @@ void piece_init(Piece *piece)
     default:
         break;
     }
+
+    // Assign a color.
+    unsigned char color = rand() % 3;
+    switch (color)
+    {
+    case 0:
+        piece->color = RED;
+        break;
+    case 1:
+        piece->color = GREEN;
+        break;
+    case 2:
+        piece->color = BLUE;
+        break;
+    }
 }
 
 void tetris_init(Tetris *tetris)
@@ -80,6 +95,8 @@ void tetris_init(Tetris *tetris)
     tetris->lines_cleared = 0;
     // pthread_mutex_init(&lock, NULL);
     // pthread_cond_init(&condition, NULL);
+
+    tetris->changed = true;
 }
 
 bool piece_rotate(Piece *piece, Tetris *tetris)
@@ -95,7 +112,7 @@ bool piece_rotate(Piece *piece, Tetris *tetris)
     for (i = 0; i < 4; i++)
     {
         Point *p = &state_union.points[i];
-        if (tetris->board[p->x + tetris->row][p->y + tetris->col] == OCCUPIED)
+        if (tetris->board[p->x + tetris->row][p->y + tetris->col] != EMPTY)
         {
             return false;
         }
@@ -157,7 +174,7 @@ bool tetris_move_left(Tetris *tetris)
     for (i = 0; i < 4; i++)
     {
         Point *p = &state_union.points[i];
-        if (tetris->board[p->x + tetris->row][p->y + tetris->col - 1] == OCCUPIED || p->y + tetris->col <= 0)
+        if (tetris->board[p->x + tetris->row][p->y + tetris->col - 1] != EMPTY || p->y + tetris->col <= 0)
         {
             return false;
         }
@@ -175,8 +192,7 @@ bool tetris_move_right(Tetris *tetris)
     for (i = 0; i < 4; i++)
     {
         Point *p = &state_union.points[i];
-        if (tetris->board[p->x + tetris->row][p->y + tetris->col + 1] ==
-                OCCUPIED ||
+        if (tetris->board[p->x + tetris->row][p->y + tetris->col + 1] != EMPTY ||
             p->y + tetris->col >= (GAME_WIDTH - 1))
         {
             return false;
@@ -195,10 +211,11 @@ void tetris_place_piece(Tetris *tetris)
     for (i = 0; i < 4; i++)
     {
         Point *p = &state_union.points[i];
-        tetris->board[p->x + tetris->row][p->y + tetris->col] = OCCUPIED;
+        tetris->board[p->x + tetris->row][p->y + tetris->col] = piece->color;
     }
     tetris_remove_lines_and_score(tetris);
     tetris_spawn_piece(tetris);
+    tetris->changed = true;
     return;
 }
 
@@ -211,7 +228,7 @@ void tetris_visualize(Tetris *tetris)
     for (i = 0; i < 4; i++)
     {
         Point *p = &state_union.points[i];
-        tetris->board[p->x + tetris->row][p->y + tetris->col] = OCCUPIED;
+        tetris->board[p->x + tetris->row][p->y + tetris->col] = piece->color;
     }
 
     //    for (i = 0; i < GAME_HEIGHT; i++)
@@ -242,6 +259,7 @@ void tetris_visualize(Tetris *tetris)
     //        }
     //    }
     //    printf("\n");
+    tetris->changed = true;
     return;
 }
 
@@ -262,7 +280,7 @@ void tetris_spawn_piece(Tetris *tetris)
     for (i = 0; i < 4; i++)
     {
         Point *p = &state_union.points[i];
-        if (tetris->board[p->x + tetris->row][p->y + tetris->col] == OCCUPIED)
+        if (tetris->board[p->x + tetris->row][p->y + tetris->col] != EMPTY)
         {
             tetris->end_game = true;
             return;
@@ -285,6 +303,7 @@ void tetris_shift_rows_down(Tetris *tetris, unsigned char row_index)
     {
         tetris->board[0][c] = EMPTY;
     }
+    tetris->changed = true;
     return;
 }
 

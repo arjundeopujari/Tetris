@@ -13,6 +13,10 @@
 #include "tetris.h"
 #include "timer.h"
 
+#define GAME_CYCLES 500*SMCLK_FREQ/1000
+
+extern DebounceFSM fsm;
+
 /**
  * tetris contains all of the game logic and game state for the Tetris game.
  */
@@ -46,44 +50,68 @@ void main(void)
     }
 }
 
-/*Timer A0 ISR*/
+/* Timer A0 ISR*/
 void TA0_0_IRQHandler(void)
 {
+    static unsigned int game_clock = 0;
+    game_clock++;
+    // Runs with frequency 48000000 / 2 / 128 Hz = 187500 Hz ~= 5.3E-6 sec
+    // Alternatively: about 187.5 loops per millisecond.
+
+    // Tick the button FSM.
+    debounce_tick();
+    // Only do things if the buttons are new.
+    if (!fsm.is_handled) {
+        // Mark buttons as handled already.
+        fsm.is_handled = true;
+
+        // Mask off only the buttons that have changed.
+        unsigned char buttons = (fsm.current ^ fsm.prev) & fsm.current;
+
+        if (buttons & ROTATE_MASK)
+        {
+            piece_rotate(tetris_queue_get(&tetris), &tetris);
+        }
+        else if (buttons & DOWN_MASK)
+        {
+             while (tetris_shift_down(&tetris));
+        }
+        else if (buttons & LEFT_MASK)
+        {
+            tetris_move_left(&tetris);
+        }
+        else if (buttons & RIGHT_MASK)
+        {
+            tetris_move_right(&tetris);
+        } else if (buttons & NEWGAME_MASK)
+        {
+            // Completely reinitialize the game.
+            tetris_init(&tetris);
+            tetris_spawn_piece(&tetris);
+        }
+    }
+
+    // Update the display if necessary.
     if (!tetris.end_game)
     {
-        tetris_visualize(&tetris);
+        if (game_clock >= GAME_CYCLES) {
+            game_clock = 0;
+            tetris_shift_down(&tetris);
+        }
+        if (tetris.changed) {
+            tetris_visualize(&tetris);
+            tetris.changed = false;
+        }
     }
 }
 
-/*PORT 6 (buttons) ISR  */
+/* PORT 6 (buttons) ISR  */
 void PORT6_IRQHandler(void)
 {
+    __disable_interrupts();
+
     // Read all of Port 6.
     next_state(P6OUT, false);
-}
 
-/*Timer A1 ISR*/
-void TA1_0_IRQHandler(void)
-{
-    // TODO: Configure timer for TA1 for debounce.
-    unsigned char buttons = get_debounced_buttons();
-
-    if (buttons & ROTATE_MASK)
-    {
-        piece_rotate(tetris_queue_get(&tetris), &tetris);
-    }
-    else if (buttons & DOWN_MASK)
-    {
-        // TODO: Does this need to be in a while loop?
-        // while (tetris_shift_down(&tetris));
-        tetris_shift_down(&tetris);
-    }
-    else if (buttons & LEFT_MASK)
-    {
-        tetris_move_left(&tetris);
-    }
-    else if (buttons & RIGHT_MASK)
-    {
-        tetris_move_right(&tetris);
-    }
+    __enable_interrupts();
 }

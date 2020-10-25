@@ -38,8 +38,13 @@
 #define GAME_HEIGHT 20
 #define PIECE_QUEUE_SIZE 6
 
-#define EMPTY 0
-#define OCCUPIED 1
+typedef enum
+{
+    EMPTY,
+    RED,
+    GREEN,
+    BLUE
+} BoardValue;
 
 /**
  * A Point represents a pair of integers that represent a coordinate on the Tetris board (not the display).
@@ -75,6 +80,7 @@ typedef struct
     unsigned char state;
     State *states;
     unsigned char num_states;
+    BoardValue color;
 } Piece;
 
 /**
@@ -82,7 +88,7 @@ typedef struct
  */
 typedef struct
 {
-    unsigned char board[GAME_HEIGHT][GAME_WIDTH];
+    BoardValue board[GAME_HEIGHT][GAME_WIDTH];
     unsigned char score;
     unsigned char row;
     unsigned char col;
@@ -91,6 +97,8 @@ typedef struct
     Piece piece_queue[PIECE_QUEUE_SIZE];
     unsigned char piece_queue_front;
     unsigned char piece_queue_back;
+
+    bool changed;
 } Tetris;
 
 /**
