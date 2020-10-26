@@ -9,6 +9,7 @@
  */
 
 #include "tetris.h"
+#include "debug.h"
 
 const char id_to_piece_string[] = "IOTSZLJ";
 
@@ -231,16 +232,31 @@ void tetris_visualize(Tetris *tetris)
         tetris->board[p->x + tetris->row][p->y + tetris->col] = piece->color;
     }
 
-    //    for (i = 0; i < GAME_HEIGHT; i++)
-    //    {
-    //        for (j = 0; j < GAME_WIDTH; j++)
-    //        {
-    //            printf(tetris->board[i][j]);
-    //            printf(" ");
-    //        }
-    //        printf("\n");
-    //    }
-    //    printf("\n");
+#ifdef DEBUG
+    for (i = 0; i < GAME_HEIGHT; i++)
+    {
+        for (j = 0; j < GAME_WIDTH; j++)
+        {
+            switch (tetris->board[i][j])
+            {
+            case RED:
+                debug_print("R");
+                break;
+            case GREEN:
+                debug_print("G");
+                break;
+            case BLUE:
+                debug_print("B");
+                break;
+            default:
+                break;
+            }
+            debug_print(" ");
+        }
+        debug_print("\n");
+    }
+    debug_print("\n");
+#endif
 
     for (i = 0; i < 4; i++)
     {

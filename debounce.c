@@ -9,11 +9,14 @@
 #include "msp.h"
 #include "types.h"
 
-void debounce_tick() {
+void debounce_tick()
+{
     // Only "tick" if the FSM is awaiting the input to settle.
-    if (fsm.state == TRANSITION) {
+    if (fsm.state == TRANSITION)
+    {
         fsm.current_cycles++;
-        if (fsm.current_cycles >= DEBOUNCE_CYCLES) {
+        if (fsm.current_cycles >= DEBOUNCE_CYCLES)
+        {
             next_state(P6OUT, true);
         }
     }

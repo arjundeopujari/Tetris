@@ -8,12 +8,15 @@
  * Ported by: Patrick Thomas
  */
 
-#ifndef TETRIS_H_
-#define TETRIS_H_
+#pragma once
 
 #include "msp.h"
 #include "rand.h"
 #include "types.h"
+
+//#ifdef DEBUG
+//#include "ITM.h"
+//#endif
 
 /*
  * Mapping of button pins:
@@ -172,5 +175,3 @@ void tetris_shift_rows_down(Tetris *tetris, unsigned char row_index);
 void tetris_queue_enqueue(Tetris *tetris, Piece *piece);
 void tetris_queue_pop(Tetris *tetris);
 Piece *tetris_queue_get(Tetris *tetris);
-
-#endif

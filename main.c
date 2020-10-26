@@ -12,8 +12,7 @@
 #include "msp.h"
 #include "tetris.h"
 #include "timer.h"
-
-#define GAME_CYCLES 500*SMCLK_FREQ/1000
+#define GAME_CYCLES 500 * SMCLK_FREQ / 1000
 
 extern DebounceFSM fsm;
 
@@ -61,7 +60,8 @@ void TA0_0_IRQHandler(void)
     // Tick the button FSM.
     debounce_tick();
     // Only do things if the buttons are new.
-    if (!fsm.is_handled) {
+    if (!fsm.is_handled)
+    {
         // Mark buttons as handled already.
         fsm.is_handled = true;
 
@@ -74,7 +74,8 @@ void TA0_0_IRQHandler(void)
         }
         else if (buttons & DOWN_MASK)
         {
-             while (tetris_shift_down(&tetris));
+            while (tetris_shift_down(&tetris))
+                ;
         }
         else if (buttons & LEFT_MASK)
         {
@@ -83,7 +84,8 @@ void TA0_0_IRQHandler(void)
         else if (buttons & RIGHT_MASK)
         {
             tetris_move_right(&tetris);
-        } else if (buttons & NEWGAME_MASK)
+        }
+        else if (buttons & NEWGAME_MASK)
         {
             // Completely reinitialize the game.
             tetris_init(&tetris);
@@ -94,11 +96,13 @@ void TA0_0_IRQHandler(void)
     // Update the display if necessary.
     if (!tetris.end_game)
     {
-        if (game_clock >= GAME_CYCLES) {
+        if (game_clock >= GAME_CYCLES)
+        {
             game_clock = 0;
             tetris_shift_down(&tetris);
         }
-        if (tetris.changed) {
+        if (tetris.changed)
+        {
             tetris_visualize(&tetris);
             tetris.changed = false;
         }

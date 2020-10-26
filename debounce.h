@@ -5,8 +5,7 @@
  *      Author: thomas
  */
 
-#ifndef DEBOUNCE_H_
-#define DEBOUNCE_H_
+#pragma once
 
 #include "types.h"
 
@@ -49,5 +48,3 @@ void debounce_tick();
 void next_state(unsigned char buttons, bool source_is_timer);
 
 static DebounceFSM fsm = {STABLE, 0x00, 0x00, 0, false};
-
-#endif /* DEBOUNCE_H_ */
