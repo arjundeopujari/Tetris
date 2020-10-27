@@ -1,3 +1,11 @@
+/*
+ * Professional MultiSwimmers
+ * ECE 4440
+ * 
+ * debug.h
+ * 
+ * Author: Patrick Thomas
+ */
 
 #pragma once
 

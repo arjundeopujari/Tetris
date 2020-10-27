@@ -1,8 +1,10 @@
 /*
+ * Professional MultiSwimmers
+ * ECE 4440
+ * 
  * debug.c
- *
- *  Created on: Oct 26, 2020
- *      Author: thomas
+ * 
+ * Author: Patrick Thomas
  */
 
 #include "debug.h"
