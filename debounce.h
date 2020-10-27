@@ -9,9 +9,9 @@
 
 #include "types.h"
 
-#define SMCLK_FREQ 187500 // Frequency of SMCLK.
-#define DEBOUNCE_DURATION_MS 20 // Milliseconds to wait until a button settles.
-#define DEBOUNCE_CYCLES 20*SMCLK_FREQ/1000 // Number of loops until a button has settled.
+#define SMCLK_FREQ 187500                      // Frequency of SMCLK.
+#define DEBOUNCE_DURATION_MS 20                // Milliseconds to wait until a button settles.
+#define DEBOUNCE_CYCLES 20 * SMCLK_FREQ / 1000 // Number of loops until a button has settled.
 
 typedef enum
 {
