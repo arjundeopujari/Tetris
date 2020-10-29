@@ -30,9 +30,21 @@ static bool clock_interrupt_flag, button_interrupt_flag = false;
  */
 void main(void)
 {
+
+
+
+
+
     /* System initializing code */
     StopWatchdogTimer();
     ConfigureButtonsAsInput();
+
+
+    while (1) {
+        __nop();
+    }
+
+
     EnablePinsAsOutput();
     DivideSMCLK();
 
