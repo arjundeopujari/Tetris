@@ -13,12 +13,12 @@ void StopWatchdogTimer(){
 void ConfigureButtonsAsInput(){
     // Set buttons are inputs with pull up resistors
     P6DIR &= ~(BIT7 | BIT6 | BIT5 | BIT4 | BIT1 | BIT0);
-    P6REN |= (BIT7 | BIT6 | BIT5 | BIT4 | BIT1 | BIT0);
-    P6OUT |= (BIT7 | BIT6 | BIT5 | BIT4 | BIT1 | BIT0);
-    // Enable interrupts on P6.{0,1,4,5,6,7}
-    P6IE = (BIT7 | BIT6 | BIT5 | BIT4 | BIT1 | BIT0);
-    // All button interrupts should happen on falling edge of input
-    P6IES = (BIT7 | BIT6 | BIT5 | BIT4 | BIT1 | BIT0);
+//    P6REN |= (BIT7 | BIT6 | BIT5 | BIT4 | BIT1 | BIT0);
+//    P6OUT |= (BIT7 | BIT6 | BIT5 | BIT4 | BIT1 | BIT0);
+//    // Enable interrupts on P6.{0,1,4,5,6,7}
+//    P6IE = (BIT7 | BIT6 | BIT5 | BIT4 | BIT1 | BIT0);
+//    // All button interrupts should happen on falling edge of input
+//    P6IES = (BIT7 | BIT6 | BIT5 | BIT4 | BIT1 | BIT0);
 }
 
 void EnablePinsAsOutput(){

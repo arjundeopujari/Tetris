@@ -14,7 +14,7 @@ void debug_uart_config()
 {
 #ifdef DEBUG
     // Set UART into reset mode to edit settings.
-    UCA0CTLW0 |= UCSWRST;
+    UCA0CTLW0 = UCSWRST;
     /*
     Settings:
         Parity disabled
