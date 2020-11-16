@@ -17,6 +17,8 @@
 
 #define GAME_CYCLES 500 * SMCLK_FREQ / 1000
 
+#define UNUSED_PINS(p) p->DIR = 0xFF; p->REN = 0xFF
+
 extern DebounceFSM fsm;
 
 /**
@@ -36,8 +38,23 @@ void main(void)
     StopWatchdogTimer();
     ConfigureButtonsAsInput();
 
-    while (1)
-    {
+//    CS->KEY = 0x0000695A;
+//    CS->CTL0 &= ~CS_CTL0_DCORSEL0;
+//    CS->CTL1 |= CS_CTL1_DIVM__128;
+
+    UNUSED_PINS(P1);
+    UNUSED_PINS(P2);
+    UNUSED_PINS(P3);
+    UNUSED_PINS(P4);
+    UNUSED_PINS(P5);
+//    UNUSED_PINS(P6);
+    UNUSED_PINS(P7);
+    UNUSED_PINS(P8);
+    UNUSED_PINS(P9);
+    UNUSED_PINS(P10);
+
+    while (1) {
+//        debug_println("[MAIN LOOP] Test.");
         __nop();
     }
 
