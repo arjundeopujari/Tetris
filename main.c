@@ -9,6 +9,7 @@
 
 #include "debounce.h"
 #include "debug.h"
+#include "display.h"
 #include "init.h"
 #include "msp.h"
 #include "tetris.h"
@@ -31,19 +32,14 @@ static bool clock_interrupt_flag, button_interrupt_flag = false;
 void main(void)
 {
 
-
-
-
-
     /* System initializing code */
     StopWatchdogTimer();
     ConfigureButtonsAsInput();
 
-
-    while (1) {
+    while (1)
+    {
         __nop();
     }
-
 
     EnablePinsAsOutput();
     DivideSMCLK();
