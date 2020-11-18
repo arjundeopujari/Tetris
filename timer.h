@@ -11,5 +11,6 @@
 
 void ConfigureTimer(uint16_t period);
 void StartTimer();
+void ChangeMCLKSpeed();
 
 #endif /* TIMER_H_ */

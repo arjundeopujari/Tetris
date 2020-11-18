@@ -10,6 +10,8 @@
 #include "msp.h"
 #include "tetris.h"
 
+#pragma once
+
 #define WRITE_DISPLAY_LATCH(val) P1->OUT = val ? P1->OUT | BIT6 : P1->OUT & ~BIT6
 #define TOGGLE_DISPLAY_LATCH \
     P1->OUT ^= BIT6;         \
@@ -75,8 +77,6 @@ union
     struct display_data s;
     unsigned char b : 8;
 } display_data_union;
-
-#pragma once
 
 void display_init();
 void display_write(Tetris *t);
