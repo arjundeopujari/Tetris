@@ -27,7 +27,7 @@ extern DebounceFSM fsm;
  */
 static Tetris tetris;
 
-static bool clock_interrupt_flag, button_interrupt_flag = false;
+static bool clock_interrupt_flag = false;
 
 /**
  * main.c

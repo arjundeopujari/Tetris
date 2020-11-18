@@ -47,4 +47,4 @@ void debounce_tick();
  *************************/
 void next_state(unsigned char buttons, bool source_is_timer);
 
-static volatile DebounceFSM fsm = {STABLE, 0x00, 0x00, 0, false};
+static DebounceFSM fsm = {STABLE, 0x00, 0x00, 0, false};
