@@ -30,11 +30,11 @@
 /*
 1.6 LAT
 2.7 CLK
-4.0 A
-4.1 B
-4.2 C
-4.3 D
-5.0 R1
+4.0 A +
+4.1 B +
+4.2 C +
+4.3 D +
+5.0 R1 +
 5.1 B1
 5.2 G1
 5.4 R2
@@ -49,7 +49,7 @@ struct __attribute__((__packed__)) display_address
     unsigned int b : 1;
     unsigned int c : 1;
     unsigned int d : 1;
-    unsigned int __unused : 4;
+    unsigned int _unused : 4;
 };
 
 union
@@ -63,10 +63,10 @@ struct __attribute__((__packed__)) display_data
     unsigned int r1 : 1;
     unsigned int b1 : 1;
     unsigned int g1 : 1;
-    unsigned int __unused1 : 1;
+    unsigned int _unused1 : 1;
     unsigned int r2 : 1;
     unsigned int b2 : 1;
-    unsigned int __unused2 : 1;
+    unsigned int _unused2 : 1;
     unsigned int g2 : 1;
 };
 

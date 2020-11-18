@@ -42,27 +42,27 @@ void main(void)
 //    CS->CTL0 &= ~CS_CTL0_DCORSEL0;
 //    CS->CTL1 |= CS_CTL1_DIVM__128;
 
-    UNUSED_PINS(P1);
-    UNUSED_PINS(P2);
-    UNUSED_PINS(P3);
-    UNUSED_PINS(P4);
-    UNUSED_PINS(P5);
+//    UNUSED_PINS(P1);
+//    UNUSED_PINS(P2);
+//    UNUSED_PINS(P3);
+//    UNUSED_PINS(P4);
+//    UNUSED_PINS(P5);
 //    UNUSED_PINS(P6);
-    UNUSED_PINS(P7);
-    UNUSED_PINS(P8);
-    UNUSED_PINS(P9);
-    UNUSED_PINS(P10);
-
-    while (1) {
-//        debug_println("[MAIN LOOP] Test.");
-        __nop();
-    }
+//    UNUSED_PINS(P7);
+//    UNUSED_PINS(P8);
+//    UNUSED_PINS(P9);
+//    UNUSED_PINS(P10);
 
     EnablePinsAsOutput();
     DivideSMCLK();
 
+    while (1) {
+        display_address_union.b += 1;
+        P4->OUT = display_address_union.b;
+    }
+
     /* Initialize Timer */
-    ConfigureTimer(0xffff);
+    ConfigureTimer(10);
 
     /* Initialize game logic */
     tetris_init(&tetris);
@@ -158,13 +158,19 @@ void main(void)
 }
 
 /* Timer A0 ISR*/
-void TA0_0_IRQHandler(void)
-{
-    debug_println("[TA0_0_IRQHandler] Handling clock interrupt.");
-    __disable_interrupts();
+void TA0_0_IRQHandler(void) {
+    TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
     clock_interrupt_flag = true;
-    __enable_interrupts();
+//    P1->OUT ^= BIT0;
+//    TIMER_A0->CCR[0] += 50000;              // Add Offset to TACCR0
 }
+//void TA0_N_IRQHandler(void)
+//{
+//    debug_println("[TA0_0_IRQHandler] Handling clock interrupt.");
+//    __disable_interrupts();
+//    clock_interrupt_flag = true;
+//    __enable_interrupts();
+//}
 
 /* PORT 6 (buttons) ISR  */
 void PORT6_IRQHandler(void)
