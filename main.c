@@ -17,6 +17,7 @@
 
 // Test defines.
 // #define DISPLAY_ADDRESS_OUTPUT_TEST
+// #define DISPLAY_TEST
 
 #define GAME_CYCLES 500 * SMCLK_FREQ / 1000
 
@@ -28,6 +29,7 @@ extern DebounceFSM fsm;
 static Tetris tetris;
 
 static bool clock_interrupt_flag = false;
+// static bool button_interrupt_flag = false;
 
 /**
  * main.c
@@ -42,14 +44,6 @@ void main(void)
     EnablePinsAsOutput();
     DivideSMCLK();
 
-#ifdef DISPLAY_ADDRESS_OUTPUT_TEST
-    while (1)
-    {
-        display_address_union.b += 1;
-        P4->OUT = display_address_union.b;
-    }
-#endif
-
     /* Initialize Timer */
     ConfigureTimer(0xffff);
 
@@ -63,6 +57,44 @@ void main(void)
     /* Enable global interrupts */
     __enable_irq();
     StartTimer();
+
+    // Initialize the display outputs to their starting states.
+    display_init();
+
+#ifdef DISPLAY_ADDRESS_OUTPUT_TEST
+    while (1)
+    {
+        // Increment the display address byte, which should appear like a conuter on the output pins for the display address:
+        // 4.0 A
+        // 4.1 B
+        // 4.2 C
+        // 4.3 D
+        display_address_union.b += 1;
+        P4->OUT = display_address_union.b;
+    }
+#endif
+
+#ifdef DISPLAY_TEST;
+    Tetris tt;
+    int i, j;
+
+    while (1)
+    {
+        // Randomize the colors of the board.
+        for (i = 0; i < GAME_HEIGHT; i++)
+        {
+            for (j = 0; j < GAME_WIDTH; j++)
+            {
+                // Make each piece of the board a random color.
+                int r = (rand() % 3) + 1;
+                tt.board[i][j] = r;
+            }
+        }
+
+        // Now write it to the board.
+        display_write(&tt);
+    }
+#endif
 
     static unsigned int game_clock = 0;
     static unsigned char old_buttons = 0x00;
@@ -106,7 +138,9 @@ void main(void)
                 else if (buttons & DOWN_MASK)
                 {
                     while (tetris_shift_down(&tetris))
-                        ;
+                    {
+                        // Do nothing.
+                    }
                 }
                 else if (buttons & LEFT_MASK)
                 {
@@ -146,7 +180,10 @@ void main(void)
 /* Timer A0 ISR*/
 void TA0_0_IRQHandler(void)
 {
+    // No need to display interrupts temporarily; the only interrupt is a timer one.
+    // Remove the interrupt flag on the IF.
     TIMER_A0->CCTL[0] &= ~TIMER_A_CCTLN_CCIFG;
+    // Set another boolean flag to be handled in the main loop.
     clock_interrupt_flag = true;
 }
 
