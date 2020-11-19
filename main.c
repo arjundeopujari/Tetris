@@ -18,7 +18,7 @@
 // Test defines.
 // #define DISPLAY_ADDRESS_OUTPUT_TEST
 // #define DISPLAY_TEST1
-#define DISPLAY_TEST2
+// #define DISPLAY_TEST2
 
 #define GAME_CYCLES 500 * SMCLK_FREQ / 1000
 
