@@ -17,7 +17,8 @@
 
 // Test defines.
 // #define DISPLAY_ADDRESS_OUTPUT_TEST
-// #define DISPLAY_TEST
+// #define DISPLAY_TEST1
+#define DISPLAY_TEST2
 
 #define GAME_CYCLES 500 * SMCLK_FREQ / 1000
 
@@ -74,8 +75,7 @@ void main(void)
     }
 #endif
 
-#ifdef DISPLAY_TEST;
-    Tetris tt;
+#ifdef DISPLAY_TEST1;
     int i, j;
 
     while (1)
@@ -87,12 +87,37 @@ void main(void)
             {
                 // Make each piece of the board a random color.
                 int r = (rand() % 3) + 1;
-                tt.board[i][j] = r;
+                tetris.board[i][j] = r;
             }
         }
 
         // Now write it to the board.
-        display_write(&tt);
+        display_write(&tetris);
+    }
+#endif
+
+#ifdef DISPLAY_TEST2;
+    int i, j, last_i, last_j, s;
+
+    while (1)
+    {
+        // Randomize the colors of the board.
+        for (i = 0; i < GAME_HEIGHT; i++)
+        {
+            for (j = 0; j < GAME_WIDTH; j++)
+            {
+                tetris.board[last_i][last_j] = EMPTY;
+                tetris.board[i][j] = RED;
+
+                last_i = i;
+                last_j = j;
+
+                // Now write it to the board.
+                display_write(&tetris);
+
+                SLEEP(s, 1000);
+            }
+        }
     }
 #endif
 
