@@ -80,3 +80,4 @@ union
 
 void display_init();
 void display_write(Tetris *t);
+void display_write_array(BoardValue board[64][32]);

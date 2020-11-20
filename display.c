@@ -47,14 +47,14 @@ void display_write(Tetris *t)
         WRITE_DISPLAY_ADDR;
 
         // Translate to game col.
-        unsigned char col1 = i - 2 / 3;
-        unsigned char col2 = (i + 16) - 2 / 3;
+        int col1 = (i - 2) / 3;
+        int col2 = ((i + 16) - 2) / 3;
 
         // For each display column
         for (j = 0; j < 64; j++)
         {
             // Translate to game row.
-            unsigned char row = j - 4 / 3;
+            int row = (j - 4) / 3;
 
             // Reset the colors.
             display_data_union.b = 0x00;
@@ -99,6 +99,76 @@ void display_write(Tetris *t)
             }
 
             // Send data to display.
+            WRITE_DISPLAY_DATA;
+            TOGGLE_DISPLAY_CLK;
+        }
+        TOGGLE_DISPLAY_LATCH;
+        WRITE_DISPLAY_OE(0);
+    }
+}
+
+void display_write_array(BoardValue board[64][32])
+{
+    /*
+    Board is 64x32, written long ways.
+    Tetris is 10x20.
+    We write Tetris sideways with a y-offset of 2 and x-offset of 1.
+    */
+
+    WRITE_DISPLAY_OE(1);
+
+    int i, j;
+    // For each display row
+    for (i = 0; i < 16; i++)
+    {
+        display_address_union.b = i;
+        WRITE_DISPLAY_ADDR;
+
+        // Translate to game col.
+        int col1 = i;
+        int col2 = 2*i;
+
+        // For each display column
+        for (j = 0; j < 64; j++)
+        {
+            // Translate to game row.
+            int row = j;
+
+            // Reset the colors.
+            display_data_union.b = 0x00;
+
+            // Write black if before/after game region.
+            switch (board[row][col1])
+            {
+            case RED:
+                display_data_union.s.r1 = 1;
+                break;
+            case BLUE:
+                display_data_union.s.g1 = 1;
+                break;
+            case GREEN:
+                display_data_union.s.b1 = 1;
+                break;
+            default:
+                break;
+            }
+            switch (board[row][col2])
+            {
+            case RED:
+                display_data_union.s.r2 = 1;
+                break;
+            case BLUE:
+                display_data_union.s.g2 = 1;
+                break;
+            case GREEN:
+                display_data_union.s.b2 = 1;
+                break;
+            default:
+                break;
+            }
+
+            // Send data to display.
+            WRITE_DISPLAY_OE(1);
             WRITE_DISPLAY_DATA;
             TOGGLE_DISPLAY_CLK;
         }
