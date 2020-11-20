@@ -15,9 +15,9 @@
 void display_init()
 {
     // Initialize display logic.
-    WRITE_DISPLAY_LATCH(0);
-    WRITE_DISPLAY_OE(0);
-    WRITE_DISPLAY_CLK(0);
+    WRITE_DISPLAY_LATCH(1);
+    WRITE_DISPLAY_OE(1);
+    WRITE_DISPLAY_CLK(1);
 
     display_address_union.b = 0;
     display_data_union.b = 0;
@@ -28,151 +28,139 @@ void display_init()
     TOGGLE_DISPLAY_CLK;
 }
 
-void display_write(Tetris *t)
+void display_translate(Tetris *t)
 {
-    /* 
-    Board is 64x32, written long ways.
-    Tetris is 10x20.
-    We write Tetris sideways with a y-offset of 2 and x-offset of 1.
-    */
+    static int i, j, p_i, p_j, x, y;
 
-    WRITE_DISPLAY_OE(1);
+    display_clear();
 
-    int i, j;
-    // For each display row
-    for (i = 0; i < 16; i++)
+    for (i = 0; i < GAME_WIDTH; i++)
     {
-        display_address_union.b = i;
-        WRITE_DISPLAY_OE(1);
-        WRITE_DISPLAY_ADDR;
-
-        // Translate to game col.
-        int col1 = (i - 2) / 3;
-        int col2 = ((i + 16) - 2) / 3;
-
-        // For each display column
-        for (j = 0; j < 64; j++)
+        for (j = 0; j < GAME_HEIGHT; j++)
         {
-            // Translate to game row.
-            int row = (j - 4) / 3;
+            x = i * 3 + 1;
+            y = j * 3 + 2;
 
-            // Reset the colors.
-            display_data_union.b = 0x00;
-
-            // Write black if before/after game region.
-            if (!(row < 0 || row >= GAME_HEIGHT))
+            for (p_i = 0; p_i < 3; p_i++)
             {
-                if (0 <= col1 && col1 < GAME_WIDTH)
+                for (p_j = 0; p_j < 3; p_j++)
                 {
-                    switch (t->board[row][col1])
-                    {
-                    case RED:
-                        display_data_union.s.r1 = 1;
-                        break;
-                    case BLUE:
-                        display_data_union.s.g1 = 1;
-                        break;
-                    case GREEN:
-                        display_data_union.s.b1 = 1;
-                        break;
-                    default:
-                        break;
-                    }
-                }
-                if (0 <= col2 && col2 < GAME_WIDTH)
-                {
-                    switch (t->board[row][col2])
-                    {
-                    case RED:
-                        display_data_union.s.r2 = 1;
-                        break;
-                    case BLUE:
-                        display_data_union.s.g2 = 1;
-                        break;
-                    case GREEN:
-                        display_data_union.s.b2 = 1;
-                        break;
-                    default:
-                        break;
-                    }
+                    display.buffer[x + p_i][y + p_j] = t->board[j][i];
                 }
             }
-
-            // Send data to display.
-            WRITE_DISPLAY_DATA;
-            TOGGLE_DISPLAY_CLK;
         }
-        TOGGLE_DISPLAY_LATCH;
-        WRITE_DISPLAY_OE(0);
     }
 }
 
-void display_write_array(BoardValue board[64][32])
+void display_clear()
 {
-    /*
-    Board is 64x32, written long ways.
-    Tetris is 10x20.
-    We write Tetris sideways with a y-offset of 2 and x-offset of 1.
-    */
-
-    WRITE_DISPLAY_OE(1);
-
-    int i, j;
-    // For each display row
-    for (i = 0; i < 16; i++)
+    static int i, j;
+    for (i = 0; i < DISPLAY_WIDTH; i++)
     {
+        for (j = 0; j < DISPLAY_HEIGHT; j++)
+        {
+            display.buffer[i][j] = EMPTY;
+        }
+    }
+}
+
+void display_write_buffer()
+{
+    // Set all outputs to 0.
+    display_init();
+
+    int i, i1, i2, j;
+    BoardValue val1, val2;
+    for (i = 0; i < DISPLAY_WIDTH / 2; i++)
+    {
+        i1 = i;
+        i2 = i + 16;
+
         display_address_union.b = i;
         WRITE_DISPLAY_ADDR;
 
-        // Translate to game col.
-        int col1 = i;
-        int col2 = 2*i;
-
-        // For each display column
-        for (j = 0; j < 64; j++)
+        for (j = 0; j < DISPLAY_HEIGHT; j++)
         {
-            // Translate to game row.
-            int row = j;
+            // Zero the display data.
+            display_data_union.b = 0;
 
-            // Reset the colors.
-            display_data_union.b = 0x00;
+            val1 = display.buffer[i1][j];
+            val2 = display.buffer[i2][j];
 
-            // Write black if before/after game region.
-            switch (board[row][col1])
+            switch (val1)
             {
             case RED:
                 display_data_union.s.r1 = 1;
                 break;
-            case BLUE:
+            case GREEN:
                 display_data_union.s.g1 = 1;
                 break;
-            case GREEN:
+            case BLUE:
                 display_data_union.s.b1 = 1;
                 break;
-            default:
-                break;
             }
-            switch (board[row][col2])
+
+            switch (val2)
             {
             case RED:
                 display_data_union.s.r2 = 1;
                 break;
-            case BLUE:
+            case GREEN:
                 display_data_union.s.g2 = 1;
                 break;
-            case GREEN:
+            case BLUE:
                 display_data_union.s.b2 = 1;
-                break;
-            default:
                 break;
             }
 
-            // Send data to display.
-            WRITE_DISPLAY_OE(1);
             WRITE_DISPLAY_DATA;
+            __nop();
             TOGGLE_DISPLAY_CLK;
         }
-        TOGGLE_DISPLAY_LATCH;
         WRITE_DISPLAY_OE(0);
+        TOGGLE_DISPLAY_LATCH;
+        WRITE_DISPLAY_OE(1);
+    }
+}
+
+void display_test_1()
+{
+    int i, x, y;
+    x = 4;
+    y = 4;
+    // display_clear();
+
+    // display.buffer[x][y] = GREEN;
+
+    while (1)
+    {
+        // display.buffer[x][y] = RED;
+        display_clear();
+        display.buffer[x][y] = GREEN;
+        display.buffer[x][y + 1] = BLUE;
+        display.buffer[x + 1][y] = RED;
+        display.buffer[x + 1][y + 1] = GREEN;
+        display_write_buffer();
+
+        x = (x + 1) % 31;
+        y = (y + 1) % 63;
+    }
+}
+
+void display_test_2()
+{
+    Tetris t;
+    tetris_init(&t);
+    t.board[0][0] = GREEN;
+    t.board[0][1] = GREEN;
+    t.board[1][2] = GREEN;
+    t.board[0][2] = GREEN;
+
+    while (1)
+    {
+        // display.buffer[x][y] = RED;
+        display_clear();
+        display_translate(&t);
+        display_write_buffer();
     }
 }

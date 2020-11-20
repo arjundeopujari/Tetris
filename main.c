@@ -18,8 +18,7 @@
 // Test defines.
 // #define DISPLAY_ADDRESS_OUTPUT_TEST
 // #define DISPLAY_TEST1
-// #define DISPLAY_TEST2
- #define DISPLAY_TEST3
+#define DISPLAY_TEST2
 
 #define GAME_CYCLES 500 * SMCLK_FREQ / 1000
 
@@ -51,12 +50,8 @@ void main(void)
     /* Initialize Timer */
     ConfigureTimer(0xffff);
 
-    /* Initialize game logic */
-    tetris_init(&tetris);
-    tetris_spawn_piece(&tetris);
-
-    /* Initialize debug UART */
-    debug_uart_config();
+    // /* Initialize debug UART */
+    // debug_uart_config();
 
     /* Enable global interrupts */
     __enable_irq();
@@ -64,6 +59,10 @@ void main(void)
 
     // Initialize the display outputs to their starting states.
     display_init();
+
+    /* Initialize game logic */
+    tetris_init(&tetris);
+    tetris_spawn_piece(&tetris);
 
 #ifdef DISPLAY_ADDRESS_OUTPUT_TEST
     while (1)
@@ -79,195 +78,11 @@ void main(void)
 #endif
 
 #ifdef DISPLAY_TEST1
-    int i, j;
-
-    while (1)
-    {
-        // Randomize the colors of the board.
-        for (i = 0; i < GAME_HEIGHT; i++)
-        {
-            for (j = 0; j < GAME_WIDTH; j++)
-            {
-                // Make each piece of the board a random color.
-                int r = (rand() % 3) + 1;
-                tetris.board[i][j] = r;
-            }
-        }
-
-        // Now write it to the board.
-        display_write(&tetris);
-    }
+    display_test_1();
 #endif
 
 #ifdef DISPLAY_TEST2
-    BoardValue board[64][32];
-
-    while (1)
-    {
-//        int k;
-//        for (k = 0; k < 100; k++) {
-//        // Randomize the colors of the board.
-//        for (i = 0; i < GAME_WIDTH; i++)
-//        {
-//            last_i = i;
-//            for (j = 0; j < GAME_HEIGHT; j++)
-//            {
-//                tetris.board[j][last_i] = EMPTY;
-//                tetris.board[j][i] = RED;
-//            }
-//
-//            // Now write it to the board.
-//            display_write(&tetris);
-//        }
-//        }
-        int i, j, k, l;
-        k = 0;
-        for (i=0; i<64; i++) {
-            for (j=0; j<32; j++) {
-                if (k==j) {
-                    board[i][j] = GREEN;
-                } else {
-                    board[i][j] = EMPTY;
-                }
-            }
-        }
-
-        k = (k+1) % 32;
-
-        for (l=0; l<100; l++) {
-            display_write_array(board);
-        }
-    }
-#endif
-
-#ifdef DISPLAY_TEST3
-    while (1)
-    {
-        /*
-         * HANDLE BUTTON INPUTS
-         */
-        if (old_buttons ^ P6->IN)
-        {
-            old_buttons = P6->IN;
-            next_state(P6->IN, false);
-        }
-        debounce_tick();
-
-
-        /*
-         * HANDLE CLOCK INTERRUPTS
-         */
-        if (clock_interrupt_flag)
-        {
-            clock_interrupt_flag = false;
-            game_clock++;
-            // Runs with frequency 48000000 / 2 / 128 Hz = 187500 Hz ~= 5.3E-6 sec
-            // Alternatively: about 187.5 loops per millisecond.
-
-            // Tick the button FSM.
-
-            // Only do things if the buttons are new.
-//            if (!fsm.is_handled)
-//            {
-//                // Mark buttons as handled already.
-//                fsm.is_handled = true;
-//
-//                // Mask off only the buttons that have changed.
-            unsigned char buttons = ~P6->IN;
-
-            if (buttons & ROTATE_MASK)
-            {
-                int i;
-                for (i = 0; i < GAME_HEIGHT; i++) {
-                    tetris.board[i][0] = RED;
-                    tetris.board[i][1] = EMPTY;
-                    tetris.board[i][2] = EMPTY;
-                    tetris.board[i][3] = EMPTY;
-                    tetris.board[i][4] = EMPTY;
-                    tetris.board[i][5] = EMPTY;
-                }
-            }
-            else if (buttons & DOWN_MASK)
-            {
-                int i;
-                for (i = 0; i < GAME_HEIGHT; i++) {
-                    tetris.board[i][0] = EMPTY;
-                    tetris.board[i][1] = GREEN;
-                    tetris.board[i][2] = EMPTY;
-                    tetris.board[i][3] = EMPTY;
-                    tetris.board[i][4] = EMPTY;
-                    tetris.board[i][5] = EMPTY;
-                }
-            }
-            else if (buttons & LEFT_MASK)
-            {
-                int i;
-                for (i = 0; i < GAME_HEIGHT; i++) {
-                    tetris.board[i][0] = EMPTY;
-                    tetris.board[i][1] = EMPTY;
-                    tetris.board[i][2] = BLUE;
-                    tetris.board[i][3] = EMPTY;
-                    tetris.board[i][4] = EMPTY;
-                    tetris.board[i][5] = EMPTY;
-                }
-            }
-            else if (buttons & RIGHT_MASK)
-            {
-                int i;
-                for (i = 0; i < GAME_HEIGHT; i++) {
-                    tetris.board[i][0] = EMPTY;
-                    tetris.board[i][1] = EMPTY;
-                    tetris.board[i][2] = EMPTY;
-                    tetris.board[i][3] = RED;
-                    tetris.board[i][4] = EMPTY;
-                    tetris.board[i][5] = EMPTY;
-                }
-            }
-            else if (buttons & NEWGAME_MASK)
-            {
-                int i;
-                for (i = 0; i < GAME_HEIGHT; i++) {
-                    tetris.board[i][0] = EMPTY;
-                    tetris.board[i][1] = EMPTY;
-                    tetris.board[i][2] = EMPTY;
-                    tetris.board[i][3] = EMPTY;
-                    tetris.board[i][4] = GREEN;
-                    tetris.board[i][5] = EMPTY;
-                }
-            }
-            else if (buttons & PAUSE_MASK)
-            {
-                int i;
-                for (i = 0; i < GAME_HEIGHT; i++) {
-                    tetris.board[i][0] = EMPTY;
-                    tetris.board[i][1] = EMPTY;
-                    tetris.board[i][2] = EMPTY;
-                    tetris.board[i][3] = EMPTY;
-                    tetris.board[i][4] = EMPTY;
-                    tetris.board[i][5] = BLUE;
-                }
-            }
-        }
-
-            // Update the display if necessary.
-//            if (!tetris.end_game)
-//            {
-//                if (game_clock >= GAME_CYCLES)
-//                {
-//                    game_clock = 0;
-//                    tetris_shift_down(&tetris);
-//                }
-//                if (tetris.changed)
-//                {
-//                    // TODO: Update the display here?
-//                    tetris_visualize(&tetris);
-//                    tetris.changed = false;
-//                }
-            // }
-        // }
-
-        display_write(&tetris);
-    }
+    display_test_2();
 #endif
 
     while (true)

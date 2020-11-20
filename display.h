@@ -16,18 +16,31 @@
 #define TOGGLE_DISPLAY_LATCH \
     P1->OUT ^= BIT6;         \
     __nop();                 \
-    P1->OUT ^= BIT6
+    __nop();                 \
+    __nop();                 \
+    P1->OUT ^= BIT6;         \
+    __nop();                 \
+    __nop();                 \
+    __nop();
 #define WRITE_DISPLAY_OE(val) P5->OUT = val ? P5->OUT | BIT6 : P5->OUT & ~BIT6
 #define WRITE_DISPLAY_CLK(val) P2->OUT = val ? P2->OUT | BIT7 : P2->OUT & ~BIT7
 #define TOGGLE_DISPLAY_CLK \
     P2->OUT ^= BIT7;       \
     __nop();               \
-    P2->OUT ^= BIT7
+    __nop();               \
+    __nop();               \
+    P2->OUT ^= BIT7;       \
+    __nop();               \
+    __nop();               \
+    __nop();
 #define WRITE_DISPLAY_ADDR P4->OUT = display_address_union.b
 #define WRITE_DISPLAY_DATA P5->OUT = display_data_union.b | BIT6; // Bit 6 is OE, which will always be high when we are writing data.
 
 #define DISPLAY_ROW_OFFSET 1
 #define DISPLAY_COL_OFFSET 2
+
+#define DISPLAY_WIDTH 32
+#define DISPLAY_HEIGHT 64
 
 /*
 1.6 LAT
@@ -78,6 +91,49 @@ union
     unsigned char b : 8;
 } display_data_union;
 
+struct
+{
+    BoardValue buffer[32][64];
+} display;
+
+/**
+ * @brief Initialize the display pins.
+ * 
+ */
 void display_init();
-void display_write(Tetris *t);
-void display_write_array(BoardValue board[64][32]);
+
+/**
+ * @brief Translate a 10x20 board to a 32x64 one.
+ * 
+ * @param t The Tetris game object.
+ */
+void display_translate(Tetris *t);
+
+/**
+ * @brief Clear the entire buffer.
+ */
+void display_clear();
+
+/**
+ * @brief Write the display buffer to the display.
+ *  
+ */
+void display_write_buffer();
+
+/**
+ * @brief Move a pixel around.
+ * 
+ */
+void display_test_1();
+
+/**
+ * @brief Move a column around.
+ * 
+ */
+void display_test_2();
+
+/**
+ * @brief Show random pixels from a Tetris board..
+ * 
+ */
+void display_test_3();
