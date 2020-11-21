@@ -10,6 +10,7 @@
 
 #include "tetris.h"
 #include "debug.h"
+#include "display.h"
 
 const char id_to_piece_string[] = "IOTSZLJ";
 
@@ -151,7 +152,7 @@ bool tetris_shift_down(Tetris *tetris)
     for (i = 0; i < 4; i++)
     {
         Point *p = &state_union.points[i];
-        if (tetris->board[p->x + tetris->row + 1][p->y + tetris->col] == EMPTY)
+        if (tetris->board[p->x + tetris->row + 1][p->y + tetris->col] != EMPTY)
         {
             tetris_place_piece(tetris);
             return false;
@@ -257,6 +258,9 @@ void tetris_visualize(Tetris *tetris)
     }
     debug_print("\n");
 #endif
+
+    display_translate(tetris);
+    display_write_buffer();
 
     for (i = 0; i < 4; i++)
     {

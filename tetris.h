@@ -93,8 +93,8 @@ typedef struct
 {
     BoardValue board[GAME_HEIGHT][GAME_WIDTH];
     unsigned char score;
-    unsigned char row;
-    unsigned char col;
+    int row;
+    int col;
     bool end_game;
     unsigned char lines_cleared;
     Piece piece_queue[PIECE_QUEUE_SIZE];

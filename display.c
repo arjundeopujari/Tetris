@@ -16,7 +16,7 @@ void display_init()
 {
     // Initialize display logic.
     WRITE_DISPLAY_LATCH(1);
-    WRITE_DISPLAY_OE(1);
+    WRITE_DISPLAY_OE(0);
     WRITE_DISPLAY_CLK(1);
 
     display_address_union.b = 0;
@@ -25,12 +25,12 @@ void display_init()
     WRITE_DISPLAY_ADDR;
     WRITE_DISPLAY_DATA;
 
-    TOGGLE_DISPLAY_CLK;
+    // TOGGLE_DISPLAY_CLK;
 }
 
 void display_translate(Tetris *t)
 {
-    static int i, j, p_i, p_j, x, y;
+    int i, j, p_i, p_j, x, y;
 
     display_clear();
 
@@ -45,10 +45,24 @@ void display_translate(Tetris *t)
             {
                 for (p_j = 0; p_j < 3; p_j++)
                 {
-                    display.buffer[x + p_i][y + p_j] = t->board[j][i];
+                    display.buffer[31 - (x + p_i)][y + p_j] = t->board[j][i];
                 }
             }
         }
+    }
+
+    // Clear the borders.
+    for (i = 0; i < DISPLAY_WIDTH; i++)
+    {
+        display.buffer[i][0] = BLUE;
+        display.buffer[i][1] = BLUE;
+        display.buffer[i][63] = BLUE;
+        display.buffer[i][62] = BLUE;
+    }
+    for (i = 0; i < DISPLAY_HEIGHT; i++)
+    {
+        display.buffer[0][i] = BLUE;
+        display.buffer[31][i] = BLUE;
     }
 }
 
@@ -114,7 +128,6 @@ void display_write_buffer()
             }
 
             WRITE_DISPLAY_DATA;
-            __nop();
             TOGGLE_DISPLAY_CLK;
         }
         WRITE_DISPLAY_OE(0);
@@ -161,6 +174,24 @@ void display_test_2()
         // display.buffer[x][y] = RED;
         display_clear();
         display_translate(&t);
+        display_write_buffer();
+    }
+}
+
+void display_test_3()
+{
+    int i, x, y;
+    x = 4;
+    y = 4;
+    // display_clear();
+
+    // display.buffer[x][y] = GREEN;
+
+    while (1)
+    {
+        display_clear();
+        display.buffer[0][0] = GREEN;
+        display.buffer[16][0] = BLUE;
         display_write_buffer();
     }
 }

@@ -18,7 +18,8 @@
 // Test defines.
 // #define DISPLAY_ADDRESS_OUTPUT_TEST
 // #define DISPLAY_TEST1
-#define DISPLAY_TEST2
+// #define DISPLAY_TEST2
+// #define DISPLAY_TEST3
 
 #define GAME_CYCLES 500 * SMCLK_FREQ / 1000
 
@@ -38,7 +39,8 @@ void main(void)
     static Tetris tetris;
 
     static unsigned int game_clock = 0;
-    static unsigned char old_buttons = 0x00;
+    static unsigned char old_buttons = 0xff;
+    static unsigned char odd_even = 0;
 
     /* System initializing code */
     StopWatchdogTimer();
@@ -85,38 +87,46 @@ void main(void)
     display_test_2();
 #endif
 
+#ifdef DISPLAY_TEST3
+    display_test_3();
+#endif
+
     while (true)
     {
         /*
          * HANDLE BUTTON INPUTS
          */
-        if (old_buttons ^ P6->OUT)
-        {
-            old_buttons = P6->OUT;
-            next_state(P6->OUT, false);
-        }
+        // if (old_buttons ^ P6->OUT)
+        // {
+        //     old_buttons = P6->OUT;
+        //     next_state(P6->OUT, false);
+        // }
 
         /*
          * HANDLE CLOCK INTERRUPTS
          */
         if (clock_interrupt_flag)
         {
+            //            P1->OUT ^= BIT0;
+
             clock_interrupt_flag = false;
             game_clock++;
             // Runs with frequency 48000000 / 2 / 128 Hz = 187500 Hz ~= 5.3E-6 sec
             // Alternatively: about 187.5 loops per millisecond.
 
             // Tick the button FSM.
-            debounce_tick();
+            // debounce_tick();
 
             // Only do things if the buttons are new.
-            if (!fsm.is_handled)
+            unsigned char buttons = (old_buttons ^ P6->IN) & P6->IN;
+            old_buttons = P6->IN;
+            if (buttons)
             {
                 // Mark buttons as handled already.
                 fsm.is_handled = true;
 
                 // Mask off only the buttons that have changed.
-                unsigned char buttons = (fsm.current ^ fsm.prev) & fsm.current;
+                // unsigned char buttons = (fsm.current ^ fsm.prev) & fsm.current;
 
                 if (buttons & ROTATE_MASK)
                 {
@@ -148,17 +158,17 @@ void main(void)
             // Update the display if necessary.
             if (!tetris.end_game)
             {
-                if (game_clock >= GAME_CYCLES)
+                if (game_clock >= 10)
                 {
                     game_clock = 0;
                     tetris_shift_down(&tetris);
                 }
-                if (tetris.changed)
-                {
-                    // TODO: Update the display here?
-                    tetris_visualize(&tetris);
-                    tetris.changed = false;
-                }
+                tetris_visualize(&tetris);
+                //                if (tetris.changed)
+                //                {
+                //                    //     // TODO: Update the display here?
+                //                    tetris.changed = false;
+                //                }
             }
         }
     }
