@@ -26,7 +26,6 @@
 extern DebounceFSM fsm;
 
 static bool clock_interrupt_flag = false;
-// static bool button_interrupt_flag = false;
 
 /**
  * main.c
@@ -40,7 +39,7 @@ void main(void)
 
     static unsigned int game_clock = 0;
     static unsigned char old_buttons = 0xff;
-    static unsigned char odd_even = 0;
+    static unsigned char is_paused = false;
 
     /* System initializing code */
     StopWatchdogTimer();
@@ -93,29 +92,21 @@ void main(void)
 
     while (true)
     {
+        tetris_visualize(&tetris);
         /*
          * HANDLE BUTTON INPUTS
          */
-        // if (old_buttons ^ P6->OUT)
-        // {
-        //     old_buttons = P6->OUT;
-        //     next_state(P6->OUT, false);
-        // }
 
         /*
          * HANDLE CLOCK INTERRUPTS
          */
         if (clock_interrupt_flag)
         {
-            //            P1->OUT ^= BIT0;
-
             clock_interrupt_flag = false;
             game_clock++;
-            // Runs with frequency 48000000 / 2 / 128 Hz = 187500 Hz ~= 5.3E-6 sec
-            // Alternatively: about 187.5 loops per millisecond.
 
-            // Tick the button FSM.
-            // debounce_tick();
+            // Runs with frequency 48000000 / 2 / 128 Hz = 187500 Hz ~= 5.3E-6 sec
+            // Alternatively: about 187.5 loops per millisecond.\
 
             // Only do things if the buttons are new.
             unsigned char buttons = (old_buttons ^ P6->IN) & P6->IN;
@@ -127,31 +118,37 @@ void main(void)
 
                 // Mask off only the buttons that have changed.
                 // unsigned char buttons = (fsm.current ^ fsm.prev) & fsm.current;
-
-                if (buttons & ROTATE_MASK)
+                if (buttons & PAUSE_MASK)
                 {
-                    piece_rotate(tetris_queue_get(&tetris), &tetris);
-                }
-                else if (buttons & DOWN_MASK)
-                {
-                    while (tetris_shift_down(&tetris))
-                    {
-                        // Do nothing.
-                    }
-                }
-                else if (buttons & LEFT_MASK)
-                {
-                    tetris_move_left(&tetris);
-                }
-                else if (buttons & RIGHT_MASK)
-                {
-                    tetris_move_right(&tetris);
+                    is_paused = !is_paused;
                 }
                 else if (buttons & NEWGAME_MASK)
                 {
                     // Completely reinitialize the game.
                     tetris_init(&tetris);
                     tetris_spawn_piece(&tetris);
+                }
+                else if (!is_paused && !tetris.end_game)
+                {
+                    if (buttons & ROTATE_MASK)
+                    {
+                        piece_rotate(tetris_queue_get(&tetris), &tetris);
+                    }
+                    else if (buttons & DOWN_MASK)
+                    {
+                        while (tetris_shift_down(&tetris))
+                        {
+                            // Do nothing.
+                        }
+                    }
+                    else if (buttons & LEFT_MASK)
+                    {
+                        tetris_move_left(&tetris);
+                    }
+                    else if (buttons & RIGHT_MASK)
+                    {
+                        tetris_move_right(&tetris);
+                    }
                 }
             }
 
@@ -161,15 +158,16 @@ void main(void)
                 if (game_clock >= 10)
                 {
                     game_clock = 0;
-                    tetris_shift_down(&tetris);
+                    if (!is_paused)
+                    {
+                        tetris_shift_down(&tetris);
+                    }
                 }
-                tetris_visualize(&tetris);
-                //                if (tetris.changed)
-                //                {
-                //                    //     // TODO: Update the display here?
-                //                    tetris.changed = false;
-                //                }
             }
+            // else if (tetris_)
+            // {
+            //     tetris_visualize(&tetris);
+            // }
         }
     }
 }
@@ -183,12 +181,3 @@ void TA0_0_IRQHandler(void)
     // Set another boolean flag to be handled in the main loop.
     clock_interrupt_flag = true;
 }
-
-// /* PORT 6 (buttons) ISR  */
-// void PORT6_IRQHandler(void)
-// {
-//     debug_println("[PORT6_IRQHandler] Handling button interrupt.");
-//     __disable_interrupts();
-//     button_interrupt_flag = true;
-//     __enable_interrupts();
-// }

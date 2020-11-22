@@ -16,7 +16,7 @@ void display_init()
 {
     // Initialize display logic.
     WRITE_DISPLAY_LATCH(1);
-    WRITE_DISPLAY_OE(0);
+    WRITE_DISPLAY_OE(1);
     WRITE_DISPLAY_CLK(1);
 
     display_address_union.b = 0;
@@ -112,6 +112,23 @@ void display_write_buffer()
             case BLUE:
                 display_data_union.s.b1 = 1;
                 break;
+            case YELLOW:
+                display_data_union.s.r1 = 1;
+                display_data_union.s.g1 = 1;
+                break;
+            case TEAL:
+                display_data_union.s.g1 = 1;
+                display_data_union.s.b1 = 1;
+                break;
+            case PURPLE:
+                display_data_union.s.r1 = 1;
+                display_data_union.s.b1 = 1;
+                break;
+            case WHITE:
+                display_data_union.s.r1 = 1;
+                display_data_union.s.g1 = 1;
+                display_data_union.s.b1 = 1;
+                break;
             }
 
             switch (val2)
@@ -125,6 +142,23 @@ void display_write_buffer()
             case BLUE:
                 display_data_union.s.b2 = 1;
                 break;
+            case YELLOW:
+                display_data_union.s.r2 = 1;
+                display_data_union.s.g2 = 1;
+                break;
+            case TEAL:
+                display_data_union.s.g2 = 1;
+                display_data_union.s.b2 = 1;
+                break;
+            case PURPLE:
+                display_data_union.s.r2 = 1;
+                display_data_union.s.b2 = 1;
+                break;
+            case WHITE:
+                display_data_union.s.r2 = 1;
+                display_data_union.s.g2 = 1;
+                display_data_union.s.b2 = 1;
+                break;
             }
 
             WRITE_DISPLAY_DATA;
@@ -134,11 +168,14 @@ void display_write_buffer()
         TOGGLE_DISPLAY_LATCH;
         WRITE_DISPLAY_OE(1);
     }
+    // int __s;
+    // SLEEP(__s, 50);
+    // WRITE_DISPLAY_OE(1);
 }
 
 void display_test_1()
 {
-    int i, x, y;
+    int x, y;
     x = 4;
     y = 4;
     // display_clear();
@@ -180,18 +217,21 @@ void display_test_2()
 
 void display_test_3()
 {
-    int i, x, y;
-    x = 4;
-    y = 4;
-    // display_clear();
+    display_clear();
+    int i, x, y, color;
+    for (i = 0; i < 30; i++)
+    {
+        x = rand() % 32;
+        y = rand() % 64;
+        color = rand() % 4;
 
-    // display.buffer[x][y] = GREEN;
+        display.buffer[x][y] = color;
+    }
 
     while (1)
     {
-        display_clear();
-        display.buffer[0][0] = GREEN;
-        display.buffer[16][0] = BLUE;
+        // display.buffer[0][0] = GREEN;
+        // display.buffer[16][0] = BLUE;
         display_write_buffer();
     }
 }

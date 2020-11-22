@@ -24,48 +24,40 @@ void piece_init(Piece *piece)
     case 0:
         piece->states = PIECE_I_STATES;
         piece->num_states = 2;
+        piece->color = TEAL;
         break;
     case 1:
         piece->states = &PIECE_O_STATE;
         piece->num_states = 1;
+        piece->color = YELLOW;
         break;
     case 2:
         piece->states = PIECE_T_STATES;
         piece->num_states = 4;
+        piece->color = PURPLE;
         break;
     case 3:
         piece->states = PIECE_S_STATES;
         piece->num_states = 2;
+        piece->color = GREEN;
         break;
     case 4:
         piece->states = PIECE_Z_STATES;
         piece->num_states = 2;
+        piece->color = RED;
         break;
     case 5:
         piece->states = PIECE_L_STATES;
         piece->num_states = 4;
+        piece->color = WHITE;
         break;
     case 6:
         piece->states = PIECE_J_STATES;
         piece->num_states = 4;
+        piece->color = BLUE;
         break;
 
     default:
-        break;
-    }
-
-    // Assign a color.
-    unsigned char color = rand() % 3;
-    switch (color)
-    {
-    case 0:
-        piece->color = RED;
-        break;
-    case 1:
-        piece->color = GREEN;
-        break;
-    case 2:
-        piece->color = BLUE;
         break;
     }
 }
@@ -84,7 +76,7 @@ void tetris_init(Tetris *tetris)
     tetris->row = 0;
     tetris->col = 3;
 
-    srand(0); // TODO: Seed this with MCLK's value.
+    // srand(0); // TODO: Seed this with MCLK's value.
 
     unsigned int i;
     for (i = 0; i < 6; i++)
@@ -226,7 +218,7 @@ void tetris_visualize(Tetris *tetris)
     Piece *piece = tetris_queue_get(tetris);
     StateUnion state_union;
     state_union.state = piece->states[piece->state];
-    int i, j;
+    int i;
     for (i = 0; i < 4; i++)
     {
         Point *p = &state_union.points[i];

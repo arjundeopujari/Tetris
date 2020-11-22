@@ -71,11 +71,9 @@ C_SRCS__QUOTED += \
 "../debug.c" \
 "../display.c" \
 "../init.c" \
-"../main.c" \
 "../rand.c" \
 "../startup_msp432p401r_ccs.c" \
 "../system_msp432p401r.c" \
-"../tetris.c" \
 "../timer.c" 
 
 

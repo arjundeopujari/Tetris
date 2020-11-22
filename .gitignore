@@ -38,3 +38,4 @@ Debug
 *.app
 /Debug/
 /Debug__TI/
+/Release/

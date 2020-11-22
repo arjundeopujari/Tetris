@@ -46,7 +46,11 @@ typedef enum
     EMPTY,
     RED,
     GREEN,
-    BLUE
+    BLUE,
+    YELLOW,
+    TEAL,
+    PURPLE,
+    WHITE
 } BoardValue;
 
 /**

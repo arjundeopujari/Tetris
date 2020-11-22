@@ -7,34 +7,51 @@
  * Author: Patrick Thomas
  */
 
+#include "debug.h"
 #include "msp.h"
 #include "tetris.h"
 
 #pragma once
 
-#define WRITE_DISPLAY_LATCH(val) P1->OUT = val ? P1->OUT | BIT6 : P1->OUT & ~BIT6
+#define SMALL_SLEEP \
+    __nop();        \
+    __nop();        \
+    __nop();        \
+    __nop();        \
+    __nop();        \
+    __nop();        \
+    __nop();        \
+    __nop();        \
+    __nop();        \
+    __nop();        \
+    __nop()
+#define WRITE_DISPLAY_LATCH(val)                      \
+    P1->OUT = val ? P1->OUT | BIT6 : P1->OUT & ~BIT6; \
+    SMALL_SLEEP
 #define TOGGLE_DISPLAY_LATCH \
     P1->OUT ^= BIT6;         \
-    __nop();                 \
-    __nop();                 \
-    __nop();                 \
+    SMALL_SLEEP;             \
     P1->OUT ^= BIT6;         \
-    __nop();                 \
-    __nop();                 \
-    __nop();
-#define WRITE_DISPLAY_OE(val) P5->OUT = val ? P5->OUT | BIT6 : P5->OUT & ~BIT6
-#define WRITE_DISPLAY_CLK(val) P2->OUT = val ? P2->OUT | BIT7 : P2->OUT & ~BIT7
+    SMALL_SLEEP;
+#define WRITE_DISPLAY_OE(val)                         \
+    P5->OUT = val ? P5->OUT | BIT6 : P5->OUT & ~BIT6; \
+    SMALL_SLEEP
+#define WRITE_DISPLAY_CLK(val)                        \
+    P2->OUT = val ? P2->OUT | BIT7 : P2->OUT & ~BIT7; \
+    SMALL_SLEEP
 #define TOGGLE_DISPLAY_CLK \
     P2->OUT ^= BIT7;       \
-    __nop();               \
-    __nop();               \
-    __nop();               \
+    SMALL_SLEEP;           \
     P2->OUT ^= BIT7;       \
-    __nop();               \
-    __nop();               \
-    __nop();
-#define WRITE_DISPLAY_ADDR P4->OUT = display_address_union.b
-#define WRITE_DISPLAY_DATA P5->OUT = display_data_union.b | BIT6; // Bit 6 is OE, which will always be high when we are writing data.
+    SMALL_SLEEP;
+#define WRITE_DISPLAY_ADDR             \
+    SMALL_SLEEP;                       \
+    P4->OUT = display_address_union.b; \
+    SMALL_SLEEP;
+#define WRITE_DISPLAY_DATA                 \
+    SMALL_SLEEP;                           \
+    P5->OUT = display_data_union.b | BIT6; \
+    SMALL_SLEEP;
 
 #define DISPLAY_ROW_OFFSET 1
 #define DISPLAY_COL_OFFSET 2
@@ -120,20 +137,20 @@ void display_clear();
  */
 void display_write_buffer();
 
-/**
- * @brief Move a pixel around.
- * 
- */
-void display_test_1();
-
-/**
- * @brief Move a column around.
- * 
- */
-void display_test_2();
-
-/**
- * @brief Show random pixels from a Tetris board..
- * 
- */
-void display_test_3();
+///**
+// * @brief Move a pixel around.
+// *
+// */
+//void display_test_1();
+//
+///**
+// * @brief Move a column around.
+// *
+// */
+//void display_test_2();
+//
+///**
+// * @brief Show random pixels from a Tetris board..
+// *
+// */
+//void display_test_3();
