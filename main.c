@@ -19,7 +19,7 @@
 // #define DISPLAY_ADDRESS_OUTPUT_TEST
 // #define DISPLAY_TEST1
 // #define DISPLAY_TEST2
-// #define DISPLAY_TEST3
+// #define TEST_POINTS
 
 #define GAME_CYCLES 500 * SMCLK_FREQ / 1000
 
@@ -88,6 +88,29 @@ void main(void)
 
 #ifdef DISPLAY_TEST3
     display_test_3();
+#endif
+
+#ifdef TEST_POINTS
+    while (1)
+    {
+        int rotate = P6->IN & ROTATE_MASK;
+
+        display_data_union.s.r1 = 0;
+        display_data_union.s.r2 = 0;
+        WRITE_DISPLAY_DATA;
+        display_data_union.s.r1 = 1;
+        display_data_union.s.r2 = 0;
+        WRITE_DISPLAY_DATA;
+        display_data_union.s.r1 = 0;
+        display_data_union.s.r2 = 1;
+        WRITE_DISPLAY_DATA;
+        display_data_union.s.r1 = 1;
+        display_data_union.s.r2 = 1;
+        WRITE_DISPLAY_DATA;
+
+        WRITE_DISPLAY_CLK(0);
+        WRITE_DISPLAY_CLK(1);
+    }
 #endif
 
     while (true)
