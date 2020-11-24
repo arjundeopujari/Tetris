@@ -37,3 +37,4 @@ Debug
 *.out
 *.app
 /Debug/
+/Debug__TI/
