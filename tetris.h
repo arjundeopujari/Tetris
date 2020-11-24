@@ -96,7 +96,7 @@ typedef struct
 typedef struct
 {
     BoardValue board[GAME_HEIGHT][GAME_WIDTH];
-    unsigned char score;
+    unsigned int score;
     int row;
     int col;
     bool end_game;

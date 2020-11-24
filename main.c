@@ -188,10 +188,6 @@ void main(void)
                     }
                 }
             }
-            // else if (tetris_)
-            // {
-            //     tetris_visualize(&tetris);
-            // }
         }
     }
 }

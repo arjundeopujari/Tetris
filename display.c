@@ -24,15 +24,11 @@ void display_init()
 
     WRITE_DISPLAY_ADDR;
     WRITE_DISPLAY_DATA;
-
-    // TOGGLE_DISPLAY_CLK;
 }
 
 void display_translate(Tetris *t)
 {
     int i, j, p_i, p_j, x, y;
-
-    display_clear();
 
     for (i = 0; i < GAME_WIDTH; i++)
     {
@@ -41,28 +37,49 @@ void display_translate(Tetris *t)
             x = i * 3 + 1;
             y = j * 3 + 2;
 
-            for (p_i = 0; p_i < 3; p_i++)
-            {
-                for (p_j = 0; p_j < 3; p_j++)
-                {
-                    display.buffer[31 - (x + p_i)][y + p_j] = t->board[j][i];
-                }
-            }
+            display.buffer[31 - (x + 0)][y + 0] = t->board[j][i];
+            display.buffer[31 - (x + 1)][y + 0] = t->board[j][i];
+            display.buffer[31 - (x + 2)][y + 0] = t->board[j][i];
+            display.buffer[31 - (x + 0)][y + 1] = t->board[j][i];
+            display.buffer[31 - (x + 1)][y + 1] = t->board[j][i];
+            display.buffer[31 - (x + 2)][y + 1] = t->board[j][i];
+            display.buffer[31 - (x + 0)][y + 2] = t->board[j][i];
+            display.buffer[31 - (x + 1)][y + 2] = t->board[j][i];
+            display.buffer[31 - (x + 2)][y + 2] = t->board[j][i];
         }
     }
 
     // Clear the borders.
-    for (i = 0; i < DISPLAY_WIDTH; i++)
-    {
-        display.buffer[i][0] = BLUE;
-        display.buffer[i][1] = BLUE;
-        display.buffer[i][63] = BLUE;
-        display.buffer[i][62] = BLUE;
-    }
     for (i = 0; i < DISPLAY_HEIGHT; i++)
     {
         display.buffer[0][i] = BLUE;
         display.buffer[31][i] = BLUE;
+    }
+    int score_bit = 0;
+    for (i = 0; i < DISPLAY_WIDTH; i++)
+    {
+        score_bit = 1 << (i / 2);
+
+        if (t->score & score_bit)
+        {
+            display.buffer[i][0] = WHITE;
+            display.buffer[i][1] = WHITE;
+        }
+        else
+        {
+            if (i % 2 == 1)
+            {
+                display.buffer[i][0] = PURPLE;
+                display.buffer[i][1] = PURPLE;
+            }
+            else
+            {
+                display.buffer[i][0] = BLUE;
+                display.buffer[i][1] = BLUE;
+            }
+        }
+        display.buffer[i][63] = BLUE;
+        display.buffer[i][62] = BLUE;
     }
 }
 
@@ -168,9 +185,6 @@ void display_write_buffer()
         TOGGLE_DISPLAY_LATCH;
         WRITE_DISPLAY_OE(1);
     }
-    // int __s;
-    // SLEEP(__s, 50);
-    // WRITE_DISPLAY_OE(1);
 }
 
 void display_test_1()
@@ -178,13 +192,9 @@ void display_test_1()
     int x, y;
     x = 4;
     y = 4;
-    // display_clear();
-
-    // display.buffer[x][y] = GREEN;
 
     while (1)
     {
-        // display.buffer[x][y] = RED;
         display_clear();
         display.buffer[x][y] = GREEN;
         display.buffer[x][y + 1] = BLUE;
@@ -219,7 +229,7 @@ void display_test_3()
 {
     display_clear();
     int i, x, y, color;
-    for (i = 0; i < 30; i++)
+    for (i = 0; i < 60; i++)
     {
         x = rand() % 32;
         y = rand() % 64;
@@ -230,8 +240,6 @@ void display_test_3()
 
     while (1)
     {
-        // display.buffer[0][0] = GREEN;
-        // display.buffer[16][0] = BLUE;
         display_write_buffer();
     }
 }
