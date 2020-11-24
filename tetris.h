@@ -46,7 +46,11 @@ typedef enum
     EMPTY,
     RED,
     GREEN,
-    BLUE
+    BLUE,
+    YELLOW,
+    TEAL,
+    PURPLE,
+    WHITE
 } BoardValue;
 
 /**
@@ -92,9 +96,9 @@ typedef struct
 typedef struct
 {
     BoardValue board[GAME_HEIGHT][GAME_WIDTH];
-    unsigned char score;
-    unsigned char row;
-    unsigned char col;
+    unsigned int score;
+    int row;
+    int col;
     bool end_game;
     unsigned char lines_cleared;
     Piece piece_queue[PIECE_QUEUE_SIZE];

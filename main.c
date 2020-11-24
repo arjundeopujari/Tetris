@@ -19,24 +19,28 @@
 // #define DISPLAY_ADDRESS_OUTPUT_TEST
 // #define DISPLAY_TEST1
 // #define DISPLAY_TEST2
+// #define DISPLAY_TEST3
+// #define TEST_POINTS
 
 #define GAME_CYCLES 500 * SMCLK_FREQ / 1000
 
 extern DebounceFSM fsm;
 
-/**
- * tetris contains all of the game logic and game state for the Tetris game.
- */
-static Tetris tetris;
-
 static bool clock_interrupt_flag = false;
-// static bool button_interrupt_flag = false;
 
 /**
  * main.c
  */
 void main(void)
 {
+    /**
+     * tetris contains all of the game logic and game state for the Tetris game.
+     */
+    static Tetris tetris;
+
+    static unsigned int game_clock = 0;
+    static unsigned char old_buttons = 0xff;
+    static unsigned char is_paused = false;
 
     /* System initializing code */
     StopWatchdogTimer();
@@ -48,12 +52,8 @@ void main(void)
     /* Initialize Timer */
     ConfigureTimer(0xffff);
 
-    /* Initialize game logic */
-    tetris_init(&tetris);
-    tetris_spawn_piece(&tetris);
-
-    /* Initialize debug UART */
-    debug_uart_config();
+    // /* Initialize debug UART */
+    // debug_uart_config();
 
     /* Enable global interrupts */
     __enable_irq();
@@ -62,10 +62,14 @@ void main(void)
     // Initialize the display outputs to their starting states.
     display_init();
 
+    /* Initialize game logic */
+    tetris_init(&tetris);
+    tetris_spawn_piece(&tetris);
+
 #ifdef DISPLAY_ADDRESS_OUTPUT_TEST
     while (1)
     {
-        // Increment the display address byte, which should appear like a conuter on the output pins for the display address:
+        // Increment the display address byte, which should appear like a counter on the output pins for the display address:
         // 4.0 A
         // 4.1 B
         // 4.2 C
@@ -75,64 +79,47 @@ void main(void)
     }
 #endif
 
-#ifdef DISPLAY_TEST1;
-    int i, j;
+#ifdef DISPLAY_TEST1
+    display_test_1();
+#endif
 
+#ifdef DISPLAY_TEST2
+    display_test_2();
+#endif
+
+#ifdef DISPLAY_TEST3
+    display_test_3();
+#endif
+
+#ifdef TEST_POINTS
     while (1)
     {
-        // Randomize the colors of the board.
-        for (i = 0; i < GAME_HEIGHT; i++)
-        {
-            for (j = 0; j < GAME_WIDTH; j++)
-            {
-                // Make each piece of the board a random color.
-                int r = (rand() % 3) + 1;
-                tetris.board[i][j] = r;
-            }
-        }
+        int rotate = P6->IN & ROTATE_MASK;
 
-        // Now write it to the board.
-        display_write(&tetris);
+        display_data_union.s.r1 = 0;
+        display_data_union.s.r2 = 0;
+        WRITE_DISPLAY_DATA;
+        display_data_union.s.r1 = 1;
+        display_data_union.s.r2 = 0;
+        WRITE_DISPLAY_DATA;
+        display_data_union.s.r1 = 0;
+        display_data_union.s.r2 = 1;
+        WRITE_DISPLAY_DATA;
+        display_data_union.s.r1 = 1;
+        display_data_union.s.r2 = 1;
+        WRITE_DISPLAY_DATA;
+
+        WRITE_DISPLAY_CLK(0);
+        WRITE_DISPLAY_CLK(1);
     }
 #endif
 
-#ifdef DISPLAY_TEST2;
-    int i, j, last_i, last_j, s;
-
-    while (1)
-    {
-        // Randomize the colors of the board.
-        for (i = 0; i < GAME_HEIGHT; i++)
-        {
-            for (j = 0; j < GAME_WIDTH; j++)
-            {
-                tetris.board[last_i][last_j] = EMPTY;
-                tetris.board[i][j] = RED;
-
-                last_i = i;
-                last_j = j;
-
-                // Now write it to the board.
-                display_write(&tetris);
-
-                SLEEP(s, 1000);
-            }
-        }
-    }
-#endif
-
-    static unsigned int game_clock = 0;
-    static unsigned char old_buttons = 0x00;
     while (true)
     {
+        tetris_visualize(&tetris);
         /*
          * HANDLE BUTTON INPUTS
          */
-        if (old_buttons ^ P6->OUT)
-        {
-            old_buttons = P6->OUT;
-            next_state(P6->OUT, false);
-        }
 
         /*
          * HANDLE CLOCK INTERRUPTS
@@ -141,39 +128,23 @@ void main(void)
         {
             clock_interrupt_flag = false;
             game_clock++;
-            // Runs with frequency 48000000 / 2 / 128 Hz = 187500 Hz ~= 5.3E-6 sec
-            // Alternatively: about 187.5 loops per millisecond.
 
-            // Tick the button FSM.
-            debounce_tick();
+            // Runs with frequency 48000000 / 2 / 128 Hz = 187500 Hz ~= 5.3E-6 sec
+            // Alternatively: about 187.5 loops per millisecond.\
 
             // Only do things if the buttons are new.
-            if (!fsm.is_handled)
+            unsigned char buttons = (old_buttons ^ P6->IN) & P6->IN;
+            old_buttons = P6->IN;
+            if (buttons)
             {
                 // Mark buttons as handled already.
                 fsm.is_handled = true;
 
                 // Mask off only the buttons that have changed.
-                unsigned char buttons = (fsm.current ^ fsm.prev) & fsm.current;
-
-                if (buttons & ROTATE_MASK)
+                // unsigned char buttons = (fsm.current ^ fsm.prev) & fsm.current;
+                if (buttons & PAUSE_MASK)
                 {
-                    piece_rotate(tetris_queue_get(&tetris), &tetris);
-                }
-                else if (buttons & DOWN_MASK)
-                {
-                    while (tetris_shift_down(&tetris))
-                    {
-                        // Do nothing.
-                    }
-                }
-                else if (buttons & LEFT_MASK)
-                {
-                    tetris_move_left(&tetris);
-                }
-                else if (buttons & RIGHT_MASK)
-                {
-                    tetris_move_right(&tetris);
+                    is_paused = !is_paused;
                 }
                 else if (buttons & NEWGAME_MASK)
                 {
@@ -181,21 +152,40 @@ void main(void)
                     tetris_init(&tetris);
                     tetris_spawn_piece(&tetris);
                 }
+                else if (!is_paused && !tetris.end_game)
+                {
+                    if (buttons & ROTATE_MASK)
+                    {
+                        piece_rotate(tetris_queue_get(&tetris), &tetris);
+                    }
+                    else if (buttons & DOWN_MASK)
+                    {
+                        while (tetris_shift_down(&tetris))
+                        {
+                            // Do nothing.
+                        }
+                    }
+                    else if (buttons & LEFT_MASK)
+                    {
+                        tetris_move_left(&tetris);
+                    }
+                    else if (buttons & RIGHT_MASK)
+                    {
+                        tetris_move_right(&tetris);
+                    }
+                }
             }
 
             // Update the display if necessary.
             if (!tetris.end_game)
             {
-                if (game_clock >= GAME_CYCLES)
+                if (game_clock >= 10)
                 {
                     game_clock = 0;
-                    tetris_shift_down(&tetris);
-                }
-                if (tetris.changed)
-                {
-                    // TODO: Update the display here?
-                    tetris_visualize(&tetris);
-                    tetris.changed = false;
+                    if (!is_paused)
+                    {
+                        tetris_shift_down(&tetris);
+                    }
                 }
             }
         }
@@ -211,12 +201,3 @@ void TA0_0_IRQHandler(void)
     // Set another boolean flag to be handled in the main loop.
     clock_interrupt_flag = true;
 }
-
-// /* PORT 6 (buttons) ISR  */
-// void PORT6_IRQHandler(void)
-// {
-//     debug_println("[PORT6_IRQHandler] Handling button interrupt.");
-//     __disable_interrupts();
-//     button_interrupt_flag = true;
-//     __enable_interrupts();
-// }
